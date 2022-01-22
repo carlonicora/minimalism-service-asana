@@ -47,12 +47,12 @@ class AsanaObjectFactory implements SimpleObjectInterface
      */
     public function create(
         string $type,
-        mixed $data,
+        mixed $data=null,
     ): AbstractAsanaObject
     {
         return new $type(
-            objectFactory: $this->objectFactory,
             data:$data,
+            objectFactory: $this->objectFactory,
         );
     }
 }

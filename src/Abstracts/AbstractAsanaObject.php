@@ -9,26 +9,37 @@ abstract class AbstractAsanaObject
     /** @var string  */
     protected string $id;
 
+    /** @var string  */
+    private string $name;
+
+    /** @var bool  */
+    protected bool $isNew;
+
     /**
-     * @param ObjectFactory $objectFactory
-     * @param stdClass $data
+     * @param stdClass|null $data
+     * @param ObjectFactory|null $objectFactory
      */
     public function __construct(
-        protected ObjectFactory $objectFactory,
-        stdClass $data,
+        ?stdClass $data=null,
+        protected ?ObjectFactory $objectFactory=null,
     )
     {
-        $this->ingest($data);
+        $this->isNew = $data===null;
+
+        if ($data !== null) {
+            $this->id = $data->gid;
+            $this->name = $data->name;
+        }
     }
 
     /**
-     * @param stdClass $data
+     * @param string $id
      */
-    protected function ingest(
-        stdClass $data,
+    public function setId(
+        string $id,
     ): void
     {
-        $this->id = $data->gid;
+        $this->id = $id;
     }
 
     /**
@@ -41,12 +52,33 @@ abstract class AbstractAsanaObject
     }
 
     /**
+     * @return string
+     */
+    public function getName(
+    ): string
+    {
+        return $this->name;
+    }
+
+    /**
+     * @param string $name
+     */
+    public function setName(
+        string $name,
+    ): void
+    {
+        $this->name = $name;
+    }
+
+    /**
      * @return void
      */
     final public function load(
     ): void
     {
-        $this->loadDetails();
+        if (!$this->isNew) {
+            $this->loadDetails();
+        }
     }
 
     /**
@@ -54,4 +86,24 @@ abstract class AbstractAsanaObject
      */
     abstract protected function loadDetails(
     ):void;
+
+    /**
+     * @return void
+     */
+    final public function destroy(
+    ): void
+    {
+        $this->objectFactory = null;
+    }
+
+    /**
+     * @param ObjectFactory $objectFactory
+     * @return void
+     */
+    final public function initialise(
+        ObjectFactory $objectFactory,
+    ): void
+    {
+        $this->objectFactory = $objectFactory;
+    }
 }

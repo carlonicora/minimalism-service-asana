@@ -4,27 +4,11 @@ namespace CarloNicora\Minimalism\Services\Asana\Data;
 use CarloNicora\Minimalism\Services\Asana\Abstracts\AbstractAsanaObject;
 use CarloNicora\Minimalism\Services\Asana\Commands\AsanaUserCommand;
 use Exception;
-use stdClass;
 
 class AsanaUser extends AbstractAsanaObject
 {
-    /** @var string  */
-    private string $name;
-
     /** @var ?string  */
     private ?string $email=null;
-
-    /**
-     * @param stdClass $data
-     */
-    protected function ingest(
-        stdClass $data,
-    ): void
-    {
-        parent::ingest($data);
-
-        $this->name = $data->name;
-    }
 
     /**
      * @return void
@@ -40,23 +24,15 @@ class AsanaUser extends AbstractAsanaObject
 
     /**
      * @return string
-     */
-    public function getName(
-    ): string
-    {
-        return $this->name;
-    }
-
-    /**
-     * @return string
      * @throws Exception
      */
-    public function getEmail(): string
+    public function getEmail(
+    ): string
     {
         if ($this->email === null){
-            $this->loadDetails();
+            $this->load();
         }
         
-        return $this->email;
+        return $this->email ?? '';
     }
 }
