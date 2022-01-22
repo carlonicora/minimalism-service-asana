@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  minimalism-service-asana:
+    container_name: minimalism-service-asana
+    image: carlonicora/minimalism-service-asana:1.0
+    build:
+      context: .
+      dockerfile: ./php-cli/Dockerfile
+    working_dir: /app
+    volumes:
+      - ../:/app
+    tty: true
+    stdin_open: true
+    networks:
+      - default_network
+
+networks:
+  default_network:
+    driver: bridge
+    name: carlonicora

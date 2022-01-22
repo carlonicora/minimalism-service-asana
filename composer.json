@@ -1,0 +1,32 @@
+{
+  "name": "carlonicora/minimalism-service-asana",
+  "description": "Asana connection service for minimalism",
+  "version": "1.0.0",
+  "homepage": "https://carlonicora.com",
+  "time": "2022-01-22",
+  "license": "MIT",
+  "type": "library",
+  "minimum-stability": "stable",
+  "authors": [
+    {
+      "name": "Carlo Nicora",
+      "email": "carlo@carlonicora.com",
+      "homepage": "https://carlonicora.com",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": ">=8.1",
+    "carlonicora/minimalism": "~13.0",
+    "asana/asana": "~0.10"
+  },
+  "autoload": {
+    "psr-4": {
+      "CarloNicora\\Minimalism\\Services\\Asana\\":"src/"
+    }
+  },
+  "require-dev": {
+    "roave/security-advisories": "dev-master",
+    "phpunit/phpunit": "^9"
+  }
+}
