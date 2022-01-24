@@ -10,6 +10,12 @@ class Asana extends AbstractService
     /** @var Client|null  */
     private ?Client $client=null;
 
+    /** @var bool  */
+    private bool $isAuthorised;
+
+    /** @var string|null */
+    private ?string $token=null;
+
     /**
      * @param string|null $MINIMALISM_SERVICE_ASANA_TOKEN
      * @param string|null $MINIMALISM_SERVICE_ASANA_CLIENT_ID
@@ -41,14 +47,32 @@ class Asana extends AbstractService
     {
         parent::initialise();
 
+        if(array_key_exists('asana_token', $_SESSION)){
+            $this->token = $_SESSION['asana_token'];
+        }
+
         if ($this->MINIMALISM_SERVICE_ASANA_TOKEN !== null){
             $this->client = Client::accessToken($this->MINIMALISM_SERVICE_ASANA_TOKEN);
+            $this->isAuthorised = true;
         } else {
-            $this->client = Client::oauth([
-                'client_id' => $this->MINIMALISM_SERVICE_ASANA_CLIENT_ID,
-                'client_secret' => $this->MINIMALISM_SERVICE_ASANA_CLIENT_SECRET,
-                'redirect_uri' => $this->MINIMALISM_SERVICE_ASANA_REDIRECT,
-            ]);
+            if ($this->token !== null){
+                $this->client = Client::oauth([
+                    'client_id' => $this->MINIMALISM_SERVICE_ASANA_CLIENT_ID,
+                    'token' => $this->token,
+                ]);
+
+                if (!$this->client->dispatcher->authorized){
+                    $this->token = $this->client->dispatcher->refreshAccessToken();
+                }
+            } else {
+                $this->client = Client::oauth([
+                    'client_id' => $this->MINIMALISM_SERVICE_ASANA_CLIENT_ID,
+                    'client_secret' => $this->MINIMALISM_SERVICE_ASANA_CLIENT_SECRET,
+                    'redirect_uri' => $this->MINIMALISM_SERVICE_ASANA_REDIRECT,
+                ]);
+            }
+
+            $this->isAuthorised = $this->client->dispatcher->authorized;
         }
     }
 
@@ -58,8 +82,13 @@ class Asana extends AbstractService
     public function destroy(
     ): void
     {
+        if ($this->token !== null) {
+            $_SESSION['asana_token'] = $this->token;
+        }
+
         parent::destroy();
         $this->client = null;
+        $this->token = null;
     }
 
     /**
@@ -69,5 +98,24 @@ class Asana extends AbstractService
     ): Client
     {
         return $this->client;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isAuthorised(
+    ): bool
+    {
+        return $this->isAuthorised;
+    }
+
+    /**
+     * @param string $token
+     */
+    public function setToken(
+        string $token
+    ): void
+    {
+        $this->token = $token;
     }
 }
