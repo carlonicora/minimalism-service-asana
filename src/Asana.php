@@ -47,8 +47,10 @@ class Asana extends AbstractService
     {
         parent::initialise();
 
-        if(array_key_exists('asana_token', $_SESSION)){
+        if (array_key_exists('asana_token', $_SESSION) && $_SESSION['asana_token'] !== null) {
             $this->token = $_SESSION['asana_token'];
+        } elseif (array_key_exists('asana_token', $_COOKIE) && $_COOKIE['asana_token'] !== null) {
+            $this->token = $_COOKIE['asana_token'];
         }
 
         if ($this->MINIMALISM_SERVICE_ASANA_TOKEN !== null){
@@ -84,6 +86,7 @@ class Asana extends AbstractService
     {
         if ($this->token !== null) {
             $_SESSION['asana_token'] = $this->token;
+            setcookie('asana_token', $this->token, time() + (60 * 60 * 24 * 365), "/", ini_get('session.cookie_domain'), ini_get('session.cookie_secure'), ini_get('session.cookie_httponly'));
         }
 
         parent::destroy();
