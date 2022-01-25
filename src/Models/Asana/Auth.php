@@ -21,7 +21,7 @@ class Auth extends AbstractModel
         string $state,
     ): void
     {
-        if ($_SESSION['asana_state'] !== $state) {
+        if ((string)$_SESSION['asana_state'] !== $state) {
             throw new RuntimeException('OAuth State does not match', HttpCode::InternalServerError->value);
         }
         unset($_SESSION['asana_state']);
