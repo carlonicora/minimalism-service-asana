@@ -90,7 +90,7 @@ abstract class AbstractAsanaObject
     /**
      * @return void
      */
-    final public function destroy(
+    public function destroy(
     ): void
     {
         $this->objectFactory = null;
@@ -100,7 +100,7 @@ abstract class AbstractAsanaObject
      * @param ObjectFactory $objectFactory
      * @return void
      */
-    final public function initialise(
+    public function initialise(
         ObjectFactory $objectFactory,
     ): void
     {

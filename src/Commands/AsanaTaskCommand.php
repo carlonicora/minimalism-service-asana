@@ -36,7 +36,55 @@ class AsanaTaskCommand extends AbstractAsanaCommand
         return $this->factory->createFromList(
             type: AsanaTask::class,
             iterator: $this->client->tasks->getTasksForProject(
-                project_gid: $projectId
+                project_gid: $projectId,
+            ),
+        );
+    }
+
+    /**
+     * @param string $workspaceId
+     * @param array $projectIds
+     * @param array $teamIds
+     * @param string|null $text
+     * @param array $tags
+     * @param bool $completed
+     * @return AsanaTask[]
+     */
+    public function searchTasks(
+        string $workspaceId,
+        array $projectIds=[],
+        array $teamIds=[],
+        ?string $text=null,
+        array $tags=[],
+        ?bool $completed=null,
+    ): array
+    {
+        $parameters = [];
+        if ($projectIds !== []){
+            $parameters['projects.any'] = implode(',', $projectIds);
+        }
+
+        if ($teamIds !== []){
+            $parameters['teams.any'] = implode(',', $teamIds);
+        }
+
+        if ($text !== null){
+            $parameters['text'] = $text;
+        }
+
+        if ($tags !== []){
+            $parameters['tags.any'] = implode(',', $tags);
+        }
+
+        if ($completed !== null) {
+            $parameters['completed'] = $completed;
+        }
+
+        return $this->factory->createFromList(
+            type: AsanaTask::class,
+            iterator: $this->client->tasks->search(
+                workspace: $workspaceId,
+                params: $parameters,
             ),
         );
     }
@@ -68,6 +116,28 @@ class AsanaTaskCommand extends AbstractAsanaCommand
         return $this->factory->create(
             type: AsanaTask::class,
             data: $this->client->tasks->createTask(
+                params: $params,
+            ),
+        );
+    }
+
+    /**
+     * @param AsanaTask $task
+     * @return AsanaTask
+     * @throws Exception
+     */
+    public function update(
+        AsanaTask $task,
+    ): AsanaTask
+    {
+        $params = [
+            'name' => $task->getName(),
+        ];
+
+        return $this->factory->create(
+            type: AsanaTask::class,
+            data: $this->client->tasks->updateTask(
+                task_gid: $task->getId(),
                 params: $params,
             ),
         );
