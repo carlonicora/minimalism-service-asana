@@ -13,4 +13,13 @@ class AsanaSection extends AbstractAsanaObject
     {
         //$data = $this->objectFactory->create(AsanaSectionCommand::class)->loadProject($this->id);
     }
+
+    /**
+     * @return bool
+     */
+    public function canBeToday(
+    ): bool
+    {
+        return str_contains(haystack: strtolower($this->getName()??''), needle: 'today');
+    }
 }

@@ -42,6 +42,26 @@ class AsanaTaskCommand extends AbstractAsanaCommand
     }
 
     /**
+     * @param string $userId
+     * @return AsanaTask[]
+     */
+    public function getMyTasks(
+        string $userId,
+    ): array
+    {
+        return $this->factory->createFromList(
+            type: AsanaTask::class,
+            iterator: $this->client->tasks->getTasksForUserTaskList(
+                user_task_list_gid: $userId,
+                params: [
+                    'completed_since' => 'now',
+                    'opt_fields' => 'name,assignee_status,assignee_section,assignee_section.name,due_on,due_at',
+                ]
+            )
+        );
+    }
+
+    /**
      * @param string $workspaceId
      * @param array $projectIds
      * @param array $teamIds

@@ -13,5 +13,6 @@ class AsanaWorkspace extends AbstractAsanaObject
     protected function loadDetails(
     ): void
     {
+        //$data = $this->objectFactory->create(AsanaWorkspaceCommand::class)->loadWorkspace($this->id);
     }
 }

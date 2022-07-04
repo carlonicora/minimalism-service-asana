@@ -9,8 +9,8 @@ abstract class AbstractAsanaObject
     /** @var string  */
     protected string $id;
 
-    /** @var string  */
-    private string $name;
+    /** @var string|null  */
+    private ?string $name;
 
     /** @var bool  */
     protected bool $isNew;
@@ -28,7 +28,7 @@ abstract class AbstractAsanaObject
 
         if ($data !== null) {
             $this->id = $data->gid;
-            $this->name = $data->name;
+            $this->name = $data->name??null;
         }
     }
 
@@ -52,10 +52,10 @@ abstract class AbstractAsanaObject
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getName(
-    ): string
+    ): ?string
     {
         return $this->name;
     }

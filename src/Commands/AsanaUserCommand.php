@@ -72,4 +72,22 @@ class AsanaUserCommand extends AbstractAsanaCommand
 
         return $response;
     }
+
+    /**
+     * @param string $userId
+     * @param string $workspaceId
+     * @return string
+     */
+    public function getMyTasksId(
+        string $userId,
+        string $workspaceId,
+    ): string
+    {
+        $data = $this->client->user_task_lists->getUserTaskListForUser(
+            user_gid: $userId,
+            params: ['workspace' => $workspaceId],
+        );
+
+        return $data->gid;
+    }
 }

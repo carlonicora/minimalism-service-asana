@@ -3,6 +3,7 @@ namespace CarloNicora\Minimalism\Services\Asana;
 
 use Asana\Client;
 use CarloNicora\Minimalism\Abstracts\AbstractService;
+use CarloNicora\Minimalism\Services\Asana\Commands\AsanaTaskCommand;
 use CarloNicora\Minimalism\Services\Asana\Commands\AsanaUserCommand;
 use CarloNicora\Minimalism\Services\Asana\Data\AsanaUser;
 use Exception;
@@ -141,6 +142,16 @@ class Asana extends AbstractService
     }
 
     /**
+     * @return void
+     * @throws Exception
+     */
+    public function refreshUser(
+    ): void
+    {
+        $this->user = $this->objectFactory->create(AsanaUserCommand::class)->getUser();
+    }
+
+    /**
      * @return AsanaUser|null
      */
     public function getUser(): ?AsanaUser
@@ -154,5 +165,25 @@ class Asana extends AbstractService
         }
 
         return $this->user;
+    }
+
+    /**
+     * @return AsanaTaskCommand
+     * @throws Exception
+     */
+    public function tasks(
+    ): AsanaTaskCommand
+    {
+        return $this->objectFactory->create(AsanaTaskCommand::class);
+    }
+
+    /**
+     * @return AsanaUserCommand
+     * @throws Exception
+     */
+    public function users(
+    ): AsanaUserCommand
+    {
+        return $this->objectFactory->create(AsanaUserCommand::class);
     }
 }

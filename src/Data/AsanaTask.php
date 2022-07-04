@@ -1,10 +1,13 @@
 <?php
 namespace CarloNicora\Minimalism\Services\Asana\Data;
 
+use CarloNicora\Minimalism\Factories\ObjectFactory;
 use CarloNicora\Minimalism\Services\Asana\Abstracts\AbstractAsanaObject;
 use CarloNicora\Minimalism\Services\Asana\Commands\AsanaTaskCommand;
 use CarloNicora\Minimalism\Services\Asana\Factories\AsanaObjectFactory;
+use DateTime;
 use Exception;
+use stdClass;
 
 class AsanaTask extends AbstractAsanaObject
 {
@@ -23,6 +26,36 @@ class AsanaTask extends AbstractAsanaObject
     /** @var array|null  */
     private ?array $projects=null;
 
+    /** @var AsanaSection|null  */
+    private ?AsanaSection $assigneeSection=null;
+
+    /** @var string|null  */
+    private ?string $dueOn=null;
+
+    /** @var DateTime|null  */
+    private ?DateTime $dueAt=null;
+
+    /**
+     * @param stdClass|null $data
+     * @param ObjectFactory|null $objectFactory
+     * @throws Exception
+     */
+    public function __construct(?stdClass $data = null, ?ObjectFactory $objectFactory = null)
+    {
+        parent::__construct($data, $objectFactory);
+
+        if ($data?->due_on !== null){
+            $this->dueOn = $data?->due_on;
+        }
+        if ($data?->due_at !== null){
+            $this->dueAt = new DateTime($data?->due_at);
+        }
+
+        if ($data?->assignee_section !== null) {
+            $this->assigneeSection = new AsanaSection($data?->assignee_section);
+        }
+    }
+
     /**
      * @return void
      * @throws Exception
@@ -36,6 +69,10 @@ class AsanaTask extends AbstractAsanaObject
         $this->isAssigned = $data->assignee !== null;
         $this->assignee = $this->objectFactory->create(AsanaObjectFactory::class)->create(AsanaUser::class, $data->assignee);
         $this->notes = $data->notes ?? '';
+
+        if ($data->assignee_section !== null) {
+            $this->assigneeSection = new AsanaSection($data->assignee_section);
+        }
 
         $this->projects = $this->objectFactory->create(AsanaObjectFactory::class)->createFromList(AsanaProject::class, $data->projects);
     }
@@ -137,5 +174,30 @@ class AsanaTask extends AbstractAsanaObject
         }
 
         $this->projects[] = $project;
+    }
+
+    /**
+     * @return AsanaSection|null
+     */
+    public function getAssigneeSection(
+    ): ?AsanaSection
+    {
+        return $this->assigneeSection;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getDueOn(): ?string
+    {
+        return $this->dueOn;
+    }
+
+    /**
+     * @return DateTime|null
+     */
+    public function getDueAt(): ?DateTime
+    {
+        return $this->dueAt;
     }
 }
