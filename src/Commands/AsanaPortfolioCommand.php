@@ -39,4 +39,25 @@ class AsanaPortfolioCommand extends AbstractAsanaCommand
             ),
         );
     }
+
+    /**
+     * @param string $portfolioId
+     * @param string $projectId
+     * @return bool
+     */
+    public function addProjectToPortfolio(
+        string $portfolioId,
+        string $projectId,
+    ): bool
+    {
+        /** @noinspection UnusedFunctionResultInspection */
+        $this->client->portfolios->addItemForPortfolio(
+            portfolio_gid: $portfolioId,
+            params: [
+                    'item' => $projectId
+            ],
+        );
+
+        return true;
+    }
 }

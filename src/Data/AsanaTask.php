@@ -4,6 +4,7 @@ namespace CarloNicora\Minimalism\Services\Asana\Data;
 use CarloNicora\Minimalism\Factories\ObjectFactory;
 use CarloNicora\Minimalism\Services\Asana\Abstracts\AbstractAsanaObject;
 use CarloNicora\Minimalism\Services\Asana\Commands\AsanaTaskCommand;
+use CarloNicora\Minimalism\Services\Asana\Enums\AsanaTaskType;
 use CarloNicora\Minimalism\Services\Asana\Factories\AsanaObjectFactory;
 use DateTime;
 use Exception;
@@ -13,9 +14,6 @@ class AsanaTask extends AbstractAsanaObject
 {
     /** @var bool|null  */
     private ?bool $isCompleted=null;
-
-    /** @var bool|null  */
-    private ?bool $isAssigned=null;
 
     /** @var AsanaUser|null  */
     private ?AsanaUser $assignee=null;
@@ -35,6 +33,9 @@ class AsanaTask extends AbstractAsanaObject
     /** @var DateTime|null  */
     private ?DateTime $dueAt=null;
 
+    /** @var AsanaTaskType|null  */
+    private ?AsanaTaskType $taskType=null;
+
     /**
      * @param stdClass|null $data
      * @param ObjectFactory|null $objectFactory
@@ -44,15 +45,21 @@ class AsanaTask extends AbstractAsanaObject
     {
         parent::__construct($data, $objectFactory);
 
-        if ($data?->due_on !== null){
-            $this->dueOn = $data?->due_on;
-        }
-        if ($data?->due_at !== null){
-            $this->dueAt = new DateTime($data?->due_at);
-        }
+        if ($data !== null) {
+            if ($data->due_on !== null) {
+                $this->dueOn = $data->due_on;
+            }
+            if ($data->due_at !== null) {
+                $this->dueAt = new DateTime($data->due_at);
+            }
 
-        if ($data?->assignee_section !== null) {
-            $this->assigneeSection = new AsanaSection($data?->assignee_section);
+            if ($data->assignee_section !== null) {
+                $this->assigneeSection = new AsanaSection($data->assignee_section);
+            }
+
+            if ($data->resource_subtype !== null) {
+                $this->taskType = AsanaTaskType::from($data->resource_subtype);
+            }
         }
     }
 
@@ -66,7 +73,6 @@ class AsanaTask extends AbstractAsanaObject
         $data = $this->objectFactory->create(AsanaTaskCommand::class)->loadTask($this->id);
 
         $this->isCompleted = $data->completed;
-        $this->isAssigned = $data->assignee !== null;
         $this->assignee = $this->objectFactory->create(AsanaObjectFactory::class)->create(AsanaUser::class, $data->assignee);
         $this->notes = $data->notes ?? '';
 
@@ -98,10 +104,6 @@ class AsanaTask extends AbstractAsanaObject
     public function getAssignee(
     ): ?AsanaUser
     {
-        if ($this->isAssigned === null){
-            $this->load();
-        }
-
         return $this->assignee ?? null;
     }
 
@@ -112,7 +114,6 @@ class AsanaTask extends AbstractAsanaObject
         AsanaUser $assignee,
     ): void
     {
-        $this->isAssigned = true;
         $this->assignee = $assignee;
     }
 
@@ -199,5 +200,24 @@ class AsanaTask extends AbstractAsanaObject
     public function getDueAt(): ?DateTime
     {
         return $this->dueAt;
+    }
+
+    /**
+     * @return AsanaTaskType|null
+     */
+    public function getTaskType(
+    ): ?AsanaTaskType
+    {
+        return $this->taskType;
+    }
+
+    /**
+     * @param AsanaTaskType|null $taskType
+     */
+    public function setTaskType(
+        ?AsanaTaskType $taskType,
+    ): void
+    {
+        $this->taskType = $taskType;
     }
 }

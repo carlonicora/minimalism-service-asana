@@ -1,10 +1,8 @@
 <?php
 namespace CarloNicora\Minimalism\Services\Asana\Commands;
 
-use CarloNicora\Minimalism\Enums\HttpCode;
 use CarloNicora\Minimalism\Services\Asana\Abstracts\AbstractAsanaCommand;
 use CarloNicora\Minimalism\Services\Asana\Data\AsanaUser;
-use RuntimeException;
 use stdClass;
 
 class AsanaUserCommand extends AbstractAsanaCommand
@@ -52,6 +50,8 @@ class AsanaUserCommand extends AbstractAsanaCommand
         ?string $workspaceId=null,
     ): array
     {
+        $response = [];
+
         if ($teamId !== null){
             $response = $this->factory->createFromList(
                 type: AsanaUser::class,
@@ -66,8 +66,6 @@ class AsanaUserCommand extends AbstractAsanaCommand
                     workspace_gid: $workspaceId,
                 ),
             );
-        } else {
-            throw new RuntimeException('', HttpCode::NotImplemented->value);
         }
 
         return $response;

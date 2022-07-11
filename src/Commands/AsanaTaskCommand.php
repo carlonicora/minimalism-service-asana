@@ -37,6 +37,7 @@ class AsanaTaskCommand extends AbstractAsanaCommand
             type: AsanaTask::class,
             iterator: $this->client->tasks->getTasksForProject(
                 project_gid: $projectId,
+                params: ['opt_fields' => 'name,resource_subtype',],
             ),
         );
     }
@@ -153,6 +154,10 @@ class AsanaTaskCommand extends AbstractAsanaCommand
         $params = [
             'name' => $task->getName(),
         ];
+
+        if ($task->getAssignee() !== null){
+            $params['assignee'] = $task->getAssignee()->getId();
+        }
 
         return $this->factory->create(
             type: AsanaTask::class,
