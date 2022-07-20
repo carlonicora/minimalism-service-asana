@@ -36,6 +36,9 @@ class AsanaTask extends AbstractAsanaObject
     /** @var AsanaTaskType|null  */
     private ?AsanaTaskType $taskType=null;
 
+    /** @var AsanaUser[]|null  */
+    private ?array $followers=null;
+
     /**
      * @param stdClass|null $data
      * @param ObjectFactory|null $objectFactory
@@ -115,6 +118,30 @@ class AsanaTask extends AbstractAsanaObject
     ): void
     {
         $this->assignee = $assignee;
+    }
+
+    /**
+     * @param AsanaUser $follower
+     * @return void
+     */
+    public function addFollower(
+        AsanaUser $follower,
+    ): void
+    {
+        if ($this->followers === null){
+            $this->followers = [];
+        }
+
+        $this->followers[] = $follower;
+    }
+
+    /**
+     * @return AsanaUser[]|null
+     */
+    public function getFollowers(
+    ): ?array
+    {
+        return $this->followers;
     }
 
     /**

@@ -167,4 +167,35 @@ class AsanaTaskCommand extends AbstractAsanaCommand
             ),
         );
     }
+
+    /**
+     * @param AsanaTask $task
+     * @return void
+     */
+    public function addFollowers(
+        AsanaTask $task,
+    ): void
+    {
+        if ($task->getFollowers() !== null){
+            $params = [];
+
+            $followers = '';
+            foreach ($task->getFollowers() as $follower){
+                $followers .= $follower->getId() . ',';
+            }
+
+            $followers = substr($followers, 0, -1);
+
+            $params['followers'] = $followers;
+
+            /** @noinspection UnusedFunctionResultInspection */
+            $this->factory->create(
+                type: AsanaTask::class,
+                data: $this->client->tasks->addFollowersForTask(
+                    task_gid: $task->getId(),
+                    params: $params,
+                ),
+            );
+        }
+    }
 }
