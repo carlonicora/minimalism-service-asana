@@ -39,6 +39,9 @@ class AsanaTask extends AbstractAsanaObject
     /** @var AsanaUser[]|null  */
     private ?array $followers=null;
 
+    /** @var AsanaCustomField[] */
+    private array $customFields=[];
+
     /**
      * @param stdClass|null $data
      * @param ObjectFactory|null $objectFactory
@@ -62,6 +65,12 @@ class AsanaTask extends AbstractAsanaObject
 
             if ($data->resource_subtype !== null) {
                 $this->taskType = AsanaTaskType::from($data->resource_subtype);
+            }
+
+            if ($data->custom_fields !== null){
+                foreach ($data->custom_fields as $custom_field){
+                    $this->customFields[] = new AsanaCustomField($custom_field, $objectFactory);
+                }
             }
         }
     }
@@ -108,6 +117,14 @@ class AsanaTask extends AbstractAsanaObject
     ): ?AsanaUser
     {
         return $this->assignee ?? null;
+    }
+
+    /**
+     * @return AsanaCustomField[]|null
+     */
+    public function getCustomFields(
+    ): ?array {
+        return $this->customFields ?? null;
     }
 
     /**

@@ -20,6 +20,12 @@ class Asana extends AbstractService
     /** @var string|null */
     private ?string $token=null;
 
+    /** @var string|null */
+    private ?string $refreshToken=null;
+
+    /** @var int|null  */
+    private ?int $expiration=null;
+
     /** @var AsanaUser|null  */
     private ?AsanaUser $user=null;
 
@@ -61,15 +67,83 @@ class Asana extends AbstractService
             $this->token = $_COOKIE['asana_token'];
         }
 
+        if (array_key_exists('asana_refresh_token', $_SESSION) && $_SESSION['asana_refresh_token'] !== null) {
+            $this->refreshToken = $_SESSION['asana_refresh_token'];
+        } elseif (array_key_exists('asana_refresh_token', $_COOKIE) && $_COOKIE['asana_refresh_token'] !== null) {
+            $this->refreshToken = $_COOKIE['asana_refresh_token'];
+        }
+
+        if (array_key_exists('asana_expiration', $_SESSION) && $_SESSION['asana_expiration'] !== null) {
+            $this->expiration = $_SESSION['asana_expiration'];
+        } elseif (array_key_exists('asana_expiration', $_COOKIE) && $_COOKIE['asana_expiration'] !== null) {
+            $this->expiration = $_COOKIE['asana_expiration'];
+        }
+
+        $this->authorise();
+    }
+
+    /**
+     * @return void
+     */
+    public function destroy(
+    ): void
+    {
+        if ($this->token !== null) {
+            $_SESSION['asana_token'] = $this->token;
+            $_SESSION['asana_refresh_token'] = $this->refreshToken;
+            if ($this->client->dispatcher->expiresIn !== null) {
+                $_SESSION['asana_expiration'] = $this->client->dispatcher->expiresIn + time();
+            } else {
+                $_SESSION['asana_expiration'] = $this->expiration;
+            }
+            setcookie('asana_token', $this->token, time() + (60 * 60 * 24 * 365), "/", ini_get('session.cookie_domain'), ini_get('session.cookie_secure'), ini_get('session.cookie_httponly'));
+            setcookie('asana_refresh_token', $this->refreshToken, time() + (60 * 60 * 24 * 365), "/", ini_get('session.cookie_domain'), ini_get('session.cookie_secure'), ini_get('session.cookie_httponly'));
+            setcookie('asana_expiration', $this->expiration, time() + (60 * 60 * 24 * 365), "/", ini_get('session.cookie_domain'), ini_get('session.cookie_secure'), ini_get('session.cookie_httponly'));
+
+            $this->user->destroy();
+            $_SESSION['asana_user'] = serialize($this->user);
+        }
+
+        parent::destroy();
+        $this->user = null;
+        $this->client = null;
+        $this->token = null;
+        $this->refreshToken = null;
+        $this->expiration = null;
+    }
+
+    /**
+     * @return Client
+     */
+    public function getClient(
+    ): Client
+    {
+        return $this->client;
+    }
+
+    public function isAuthorised(
+    ): bool {
+        return $this->isAuthorised;
+    }
+
+    /**
+     * @return void
+     */
+    public function authorise(
+    ): void
+    {
         if ($this->MINIMALISM_SERVICE_ASANA_TOKEN !== null){
-            $this->client = Client::accessToken($this->MINIMALISM_SERVICE_ASANA_TOKEN);
-            $this->isAuthorised = true;
+            if ($this->client === null) {
+                $this->client = Client::accessToken($this->MINIMALISM_SERVICE_ASANA_TOKEN);
+                $this->isAuthorised = true;
+            }
         } else {
             if ($this->token !== null){
                 $this->client = Client::oauth([
                     'client_id' => $this->MINIMALISM_SERVICE_ASANA_CLIENT_ID,
                     'client_secret' => $this->MINIMALISM_SERVICE_ASANA_CLIENT_SECRET,
                     'token' => $this->token,
+                    'refresh_token' => $this->refreshToken,
                     'redirect_uri' => $this->MINIMALISM_SERVICE_ASANA_REDIRECT,
                 ]);
 
@@ -84,6 +158,12 @@ class Asana extends AbstractService
                 ]);
             }
 
+            if ($this->expiration !== null && ($this->expiration - time()) > 60){
+                $this->client->dispatcher->setExpiresInSeconds($this->expiration - time());
+            } else {
+                $this->client->dispatcher->setExpiresInSeconds(0);
+            }
+
             $this->isAuthorised = $this->client->dispatcher->authorized;
         }
 
@@ -94,44 +174,6 @@ class Asana extends AbstractService
     }
 
     /**
-     * @return void
-     */
-    public function destroy(
-    ): void
-    {
-        if ($this->token !== null) {
-            $_SESSION['asana_token'] = $this->token;
-            setcookie('asana_token', $this->token, time() + (60 * 60 * 24 * 365), "/", ini_get('session.cookie_domain'), ini_get('session.cookie_secure'), ini_get('session.cookie_httponly'));
-
-            $this->user->destroy();
-            $_SESSION['asana_user'] = serialize($this->user);
-        }
-
-        parent::destroy();
-        $this->user = null;
-        $this->client = null;
-        $this->token = null;
-    }
-
-    /**
-     * @return Client
-     */
-    public function getClient(
-    ): Client
-    {
-        return $this->client;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isAuthorised(
-    ): bool
-    {
-        return $this->isAuthorised;
-    }
-
-    /**
      * @param string $token
      */
     public function setToken(
@@ -139,6 +181,18 @@ class Asana extends AbstractService
     ): void
     {
         $this->token = $token;
+    }
+
+    public function setRefreshToken(
+        string $refreshToken,
+    ): void {
+        $this->refreshToken = $refreshToken;
+    }
+
+    public function setExpiration(
+        int $expiration
+    ): void {
+        $this->expiration = time() + $expiration;
     }
 
     /**

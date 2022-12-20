@@ -8,6 +8,17 @@ use stdClass;
 
 class AsanaTaskCommand extends AbstractAsanaCommand
 {
+    public function getTask(
+        string $taskId,
+    ): AsanaTask {
+        return $this->factory->create(
+            type: AsanaTask::class,
+            data: $this->client->tasks->getTask(
+                task_gid: $taskId,
+            ),
+        );
+    }
+
     /**
      * @param string $taskId
      * @return stdClass
@@ -37,7 +48,7 @@ class AsanaTaskCommand extends AbstractAsanaCommand
             type: AsanaTask::class,
             iterator: $this->client->tasks->getTasksForProject(
                 project_gid: $projectId,
-                params: ['opt_fields' => 'name,resource_subtype',],
+                params: ['opt_fields' => 'name,resource_subtype,custom_fields',],
             ),
         );
     }
@@ -165,6 +176,16 @@ class AsanaTaskCommand extends AbstractAsanaCommand
                 task_gid: $task->getId(),
                 params: $params,
             ),
+        );
+    }
+
+    public function delete(
+        AsanaTask $task,
+    ): void
+    {
+        /** @noinspection UnusedFunctionResultInspection */
+        $this->client->tasks->deleteTask(
+            task_gid: $task->getId(),
         );
     }
 

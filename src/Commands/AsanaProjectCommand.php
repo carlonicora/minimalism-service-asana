@@ -37,7 +37,6 @@ class AsanaProjectCommand extends AbstractAsanaCommand
             iterator: $this->client->projects->getProjectsForTeam(
                 team_gid: $teamId,
                 params: ['archived' => $isArchived],
-                options: [],
             ),
         );
     }

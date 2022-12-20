@@ -26,7 +26,12 @@ class Auth extends AbstractModel
         }
         unset($_SESSION['asana_state']);
 
-        $asana->setToken($asana->getClient()->dispatcher->fetchToken($code));
+        $dispatcher = $asana->getClient()->dispatcher;
+
+        $asana->setToken($dispatcher->fetchToken($code));
+        $asana->setRefreshToken($dispatcher->refreshToken);
+        $dispatcher->setExpiresInSeconds($dispatcher->expiresIn);
+        $asana->setExpiration($dispatcher->getExpiresInSeconds() ?? 0);
 
         $redirect = $_SESSION['asana_redirect'];
         unset($_SESSION['asana_redirect']);
