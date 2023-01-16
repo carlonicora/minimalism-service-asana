@@ -81,7 +81,7 @@ class AsanaUserCommand extends AbstractAsanaCommand
         string $workspaceId,
     ): string
     {
-        $data = $this->client->user_task_lists->getUserTaskListForUser(
+        $data = $this->client->usertasklists->getUserTaskListForUser(
             user_gid: $userId,
             params: ['workspace' => $workspaceId],
         );

@@ -91,7 +91,7 @@ class Asana extends AbstractService
         if ($this->token !== null) {
             $_SESSION['asana_token'] = $this->token;
             $_SESSION['asana_refresh_token'] = $this->refreshToken;
-            if ($this->client->dispatcher->expiresIn !== null) {
+            if (isset($this->client->dispatcher->expiresIn)) {
                 $_SESSION['asana_expiration'] = $this->client->dispatcher->expiresIn + time();
             } else {
                 $_SESSION['asana_expiration'] = $this->expiration;

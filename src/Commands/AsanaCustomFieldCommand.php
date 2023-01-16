@@ -18,7 +18,7 @@ class AsanaCustomFieldCommand extends AbstractAsanaCommand
         /** @noinspection PhpUnnecessaryLocalVariableInspection */
         return $this->factory->createFromList(
             type: AsanaCustomField::class,
-            iterator: $this->client->custom_fields->getCustomFieldsForWorkspace(
+            iterator: $this->client->customfields->getCustomFieldsForWorkspace(
                 workspace_gid: $workspaceId,
             ),
         );
@@ -34,7 +34,7 @@ class AsanaCustomFieldCommand extends AbstractAsanaCommand
     {
         return $this->factory->create(
             type: AsanaCustomField::class,
-            data: $this->client->custom_fields->getCustomField(
+            data: $this->client->customfields->getCustomField(
                 custom_field_gid: $customFieldId,
                 params: ['opt_fields' => 'enum_options,multi_enum_values',],
             ),
